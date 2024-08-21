@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:w2="http://www.inswave.com/websquare"
+	xmlns:xf="http://www.w3.org/2002/xforms">
+	<head meta_screenId="TimerPopup" meta_screenName="로그인 시간 제한 체크 예제">
+		<w2:type>COMPONENT</w2:type>
+		<w2:buildDate />
+		<w2:MSA />
+		<xf:model>
+			<w2:dataCollection baseNode="map">
+				<w2:dataMap baseNode="map" id="dma_fileDesc">
+					<w2:keyInfo>
+						<w2:key id="desc" name="파일 설명" dataType="text"></w2:key>
+						<w2:key id="test" name="파일 테스트 방법" dataType="text"></w2:key>
+					</w2:keyInfo>
+					<w2:data use="true">
+						<desc><![CDATA[\n<pre class="textNor" style="">\n<div class="etcbox">로그인 시간 제한 체크 기능 테스트 샘플이다.\n단위 개발자가 단위 화면 관리를 위한 용도로 사용한다.\n</div>\n<div class="etc_tit">정적 submission 생성 </div>\n  - 정적 submission을 등록하여 사용한다.\n  예) &lt;xf:submission id="sbm_selectTemp" ....&gt;&lt;/xf:submission&gt;\n</pre>\n\t\t\t\t\t\t]]></desc>
+						<test><![CDATA[
+<pre class="textNor">
+<div class="etc_tit">1. 과정</div>
+- 아래와 같이 등록한 submission을 실행한다.
+  com.sbm.execute(sbm_selectTemp);
+</div>
+<div class="etc_tit">2. 결과</div>
+- 정적 submission을 통해 실행된 결과가 gridView에 표현된다.
+</pre>
+						]]></test>
+					</w2:data>
+				</w2:dataMap>
+			</w2:dataCollection>				
+			<w2:workflowCollection />
+		</xf:model>
+		<w2:layoutInfo />
+		<w2:publicInfo method="" />
+		<w2:common src="../../ui/SP/LoginSessionTimer/setIdleInterval.xml" id="timer"></w2:common>
+<script lazy="false" type="text/javascript"><![CDATA[/**
+ * @event
+ * @name onpageload
+ * @description 초기화 함수
+ */
+scwin.onpageload = async function () {
+	let _opt = {
+		showComp: tbx_time.getID(),
+		_msg: {
+			title: "자동로그아웃 안내",
+			content: "고객님의 안전한 거래를 위해 $0분동안 이용이 없어 자동로그아웃합니다.\n 로그인 시간을 연장하시겠습니까?"
+		},
+		_time: {
+			unit: 0,  // 0: min[default], 1:second
+			type: 0,  // 0: once, 1: interval
+			max: 1,  // 1분 후에 자동로그아웃 안내 메시지가 출력
+			first: 1,
+			chkInterval: 0.5 // 서버의 남아있는 세션시간을 확인하는 interval time 			
+		}
+	};
+	_opt._msg.content = scwin.replaceString(_opt._msg.content, _opt._time.max);
+	await timer.setIdleTime.svr($p, 'create', _opt);
+};
+
+/**
+ * @event
+ * @name btn_continue_onclick
+ * @description reset Timer버튼을 누른 경우 연장한다.
+ */
+scwin.btn_continue_onclick = function (e) {
+	if (timer.setIdleTime.worker) {
+		console.log('연장!!');
+		timer.setIdleTime.svr($p, 'continue');
+	}
+};
+
+/**
+ * @method
+ * @name replaceString
+ * @description 문자열을 받아 재배치한다.
+ */
+scwin.replaceString = function (str, ...values) {
+	return str.replace(/\$(\d+)/g, (match, index) => values[index]);
+}
+]]></script>
+	</head>
+	<body ev:onpageload="scwin.onpageload">
+		<xf:group id="" class="pop_contents">
+			<w2:textbox style="height: 40px;" id="tbx_time" label=""></w2:textbox>
+		<xf:group id="" class="btnbox"><xf:group id="" class="rt"><xf:trigger ev:onclick="scwin.btn_continue_onclick" style="" id="btn_continue" type="button" class="btn_cm">
+				<xf:label><![CDATA[reset Timer]]></xf:label>
+			</xf:trigger></xf:group></xf:group></xf:group>
+	</body>
+</html>

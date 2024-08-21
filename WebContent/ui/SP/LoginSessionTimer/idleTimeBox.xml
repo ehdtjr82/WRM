@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
+	<head meta_screenId="idleTimeBox" meta_screenName="idleTimeBox">
+		<w2:type>COMPONENT</w2:type>
+		<w2:buildDate />
+		<xf:model>
+			<xf:instance>
+				<data xmlns="" />
+			</xf:instance>
+			<w2:dataCollection>
+			</w2:dataCollection>
+		</xf:model>
+		<script type="text/javascript" lazy="false"><![CDATA[
+scwin.continue = false;
+
+/**
+ * 메시지 박스 화면 초기화 작업을 수행한다.
+ * 
+ * @event
+ * @name onpageload
+ * @description 초기화 함수
+ */
+scwin.onpageload = function () {
+	try {
+		const msgData = $c.data.getParameter("msgData") || {};
+		tbx_message.setValue(msgData.content);
+
+	} catch (ex) {
+		console.error(ex);
+	}
+};
+
+/**
+ * @event
+ * @name btn_confirm_onclick
+ * @description 확인 버튼 클릭 시 login시간 연장.
+ */
+scwin.btn_confirm_onclick = function (e) {
+	try {
+		console.log("연장한다!!");
+		scwin.continue = true;
+		$c.win.closePopup();
+	} catch (ex) {
+		console.error(ex);
+	}
+};
+
+/**
+ * @event
+ * @name btn_cancel_onclick
+ * @description 취소 버튼 클릭 시 로그인 시간 연장 안함.
+ */
+scwin.btn_cancel_onclick = function (e) {
+	try {
+		console.log("연장안한다!!");
+		scwin.continue = false;
+		$c.win.closePopup();
+	} catch (ex) {
+		console.error(ex);
+	}
+};]]></script>
+	</head>
+	<body ev:onpageload="scwin.onpageload">
+		<xf:group id="" class="pop_contents"> 
+	    	<xf:group id="" class="msgbox">
+	    		<xf:textarea style="width:100%; height: 84px; padding-top: 20px; padding-bottom: 10px; border: 0px;" readOnly="true"
+	    			id="tbx_message" displaymessage="" class="">
+	    		</xf:textarea>
+	    		<w2:textbox id="tbx_time" label="" style="width: 150px;height: 30px;margin-top:4px;"></w2:textbox>
+	    	</xf:group>
+	    	<xf:group class="btnbox" id="" style="margin:0px">
+	    		<xf:group class="rt" id="">
+	    			<xf:trigger class="btn_cm pt" id="btn_confirm" style="" type="button" ev:onclick="scwin.btn_confirm_onclick">
+	    				<xf:label><![CDATA[로그인시간 연장하기]]></xf:label>
+	    			</xf:trigger>
+	    			<xf:trigger class="btn_cm" id="btn_cancel" style="" type="button" ev:onclick="scwin.btn_cancel_onclick">
+	    				<xf:label><![CDATA[로그인시간 연장하지 않기]]></xf:label>
+	    			</xf:trigger>
+	    		</xf:group>
+	    	</xf:group>
+	    </xf:group>	 
+	</body>
+</html>

@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:w2="http://www.inswave.com/websquare"
+	xmlns:xf="http://www.w3.org/2002/xforms">
+	<head meta_screenId="contentHeader" meta_screenName="공통 화면 헤더 영역 프레임" meta_screenDesc="화면 제목, 공통 버튼을 표시합니다.">
+		<w2:type>COMPONENT</w2:type>
+		<w2:buildDate />
+		<xf:model>
+			<xf:instance>
+				<data xmlns="" />
+			</xf:instance>
+			<w2:dataCollection baseNode="map">
+			</w2:dataCollection>
+		</xf:model>
+		<w2:layoutInfo></w2:layoutInfo>
+		<w2:publicInfo method=""></w2:publicInfo>		
+		<script type="text/javascript" lazy="false"><![CDATA[
+scwin.onpageload = function () {
+	scwin.wfTitleFavInit();
+};
+
+scwin.wfTitleFavInit = function () {
+	const param = $c.data.getParameter("menuInfo", $p.parent().$p);
+	const menuInfoArr = [];
+	try {
+
+		let favStatus = "F";
+		if ($p.main().wfm_side.getWindow().scwin.hasFavCode(param.menuCode) > 0) {
+			favStatus = "T";
+		}
+
+		scwin.setFavStatus(param.menuCode, favStatus);
+		scwin.setMenuNavi(param.menuCode, param.menuNm, param.menuType);
+	} catch (ex) {
+		grp_main.hide();
+	}
+};
+
+scwin.setMenuNavi = function (menuCode, menuName, menuType) {
+	let naviArr, naviArrLen, naviStr, menuNm;
+	try {
+		if ((typeof menuType !== "undefined") && (menuType === "SP")) {
+			menuNm = menuName;
+			naviArr = ["샘플화면", menuName];
+		} else {
+			naviArr = ($p.main().wfm_side.getWindow().scwin.getMenuNavigation(menuCode)).split("%|%");
+			naviArrLen = parseInt(naviArr.length / 2);
+			naviStr = "";
+			menuNm = naviArr[0];
+			for (let i = naviArrLen; i >= 0; i--) {
+				naviStr += naviArr[i * 2];
+
+				if (i < naviArrLen && i > 0) {
+					naviStr += " > ";
+				}
+			}
+		}
+	} catch (ex) {
+		naviStr = "";
+		menuNm = menuName;
+	} finally {
+        scwin.generator_insertMenu(naviArr);
+		txt_h1.setValue(menuNm);
+	}
+};
+
+scwin.generator_insertMenu = function(naviArr) {
+    let genChildren;
+    let arr = [];
+
+    // 배열 거꾸로 풀기
+	if(naviArr.length > 2) {
+		for(let i = naviArr.length - 1 ; i>=0; i--) {
+			if(i % 2 === 0 && naviArr[i] != "") {
+				arr.push(naviArr[i]);
+			}
+		};
+	} else {
+		arr = naviArr;
+	};
+
+    // draw
+    for( let num = 0;  num < arr.length; num++) {
+        gen_navi.insertChild(num);
+        genChildren = gen_navi.getChild(num, "spn_menu");
+        genChildren.setValue(arr[num]);
+    };
+};
+
+
+scwin.setFavStatus = function (menuCode, favStatus) {
+	btn_fav.setUserData("t_menuCode", menuCode);
+	btn_fav.setUserData("t_favStatus", favStatus);
+
+	if (favStatus == "T") {
+		btn_fav.addClass("on");
+	} else {
+		btn_fav.removeClass("on");
+	}
+};
+
+scwin.btn_fav_onclick = function () {
+	const menuCode = btn_fav.getUserData("t_menuCode");
+	let favStatus = btn_fav.getUserData("t_favStatus");
+
+	$p.main().wfm_side.getWindow().scwin.updateFav(menuCode, favStatus);
+
+	if (favStatus == "T") {
+		favStatus = "F";
+	} else {
+		favStatus = "T";
+	}
+	scwin.setFavStatus(menuCode, favStatus);
+};
+
+scwin.showScreenInfo = function () {
+	const pageUrl = $p.parent().$p.getFrame().getSrc();
+	$c.win.alert("[" + txt_h1.getValue() + "] 페이지의 파일 경로는 다음과 같습니다.\n" + pageUrl);
+};
+
+/**
+ * 화면을 갱신한다.
+ */
+scwin.reload = function () {
+	$p.parent().$p.reinitialize();
+};
+
+
+scwin.btn_home_onclick = function () {
+	$c.win.goHome();
+};
+]]></script>
+	</head>
+	<body ev:onpageload="scwin.onpageload">
+		<xf:group class="pgtbox" id="grp_main" style="">
+			<w2:textbox class="pgt_tit" id="txt_h1" label="Page Title" style="" tagname=""></w2:textbox>
+			<xf:group class="breadcrumb" id="" style="">
+				<xf:group id="" style="" tagname="ul">
+					<xf:group class="home" id="" style="" tagname="li">
+						<w2:anchor id="btn_home" outerDiv="false" style="" ev:onclick="scwin.btn_home_onclick">
+							<xf:label></xf:label>
+						</w2:anchor>
+					</xf:group>
+
+					<w2:generator style="" id="gen_navi" tagname="li"><xf:group id="" style="" tagname="li">
+						<w2:span id="spn_menu" label="" style=""></w2:span>
+					</xf:group></w2:generator>
+				</xf:group>
+			</xf:group>
+		<xf:group id="" class="rt" style="margin-left: 4px;"><xf:trigger ev:onclick="scwin.btn_fav_onclick" toolTip="즐겨찾기를 추가/해제합니다" style="" id="btn_fav" type="button" class="btn_fav">
+				<xf:label></xf:label>
+			</xf:trigger><xf:trigger ev:onclick="scwin.showScreenInfo" style="" id="" type="button" title="화면 정보" class="btn_cm guide icon">
+				<xf:label></xf:label>
+			</xf:trigger><xf:trigger ev:onclick="scwin.reload" style="" id="" type="button" title="화면 갱신" class="btn_cm refresh icon">
+				<xf:label></xf:label>
+			</xf:trigger></xf:group></xf:group>
+		<xf:group class="hide" id="" style="">
+
+			
+			
+		</xf:group>
+		
+	</body>
+</html>

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:w2="http://www.inswave.com/websquare"
+	xmlns:xf="http://www.w3.org/2002/xforms">
+	<head meta_screenId="index_tabControl" meta_screenName="Tab View 레이아웃" meta_screenDesc="TabControl을 이용해서 업무 화면을 로딩하는 레이아웃레이아웃">
+		<w2:type>COMPONENT</w2:type>
+		<w2:buildDate />
+		<xf:model>
+			<w2:dataCollection baseNode="map"></w2:dataCollection>
+		</xf:model>
+		<w2:layoutInfo></w2:layoutInfo>
+		<w2:publicInfo method="scwin.settingBox_handlerEvent,scwin.closeTab"></w2:publicInfo>
+
+		<meta name="viewport" content="width=device-width, user-scalable=no"></meta>
+		<w2:common src="../../cm/pcc/main.xml"  id="main"></w2:common>
+		<script type="text/javascript" lazy="false"><![CDATA[
+/**
+ * @component
+ * @componentName udc_index_tabControl
+ * @pluginName
+ * @company
+ * @developer
+ * @category /cm/main
+ * @notSupportBrowser
+ * @version
+ * @htmlRender
+ * @icon
+ * @disableIcon
+ * @description
+ * @width
+ * @height
+ * @license
+ * @imagePath
+ * @homepage
+ */
+
+// chat 통신 flag
+scwin.chatFlag = false;
+
+scwin.onpageload = function () {
+    // Mobile일때 메뉴 동작	
+    if (WebSquare.util.isMobile()) {
+        grp_wrap.removeClass("show_menu");
+
+        $(".btn_toggle_menu").click(function () {
+            grp_wrap.toggleClass("show_menu");
+            $(".btn_toggle_menu").toggleClass("on");
+            $(".dim").toggleClass("on");
+        });
+    } else {
+        $(".btn_toggle_menu").click(function () {
+            grp_wrap.toggleClass("show_menu");
+            $(".btn_toggle_menu").toggleClass("on");
+        });
+    }
+
+    // 검색영역 show/hide
+    $(".btn_all_search").click(function () {
+        $(".search_field").toggleClass("active");
+    });
+
+    // 탭 타이틀 on/off
+    $(".side_tab a").click(function () {
+        $(this).parent().addClass("on").siblings().removeClass("on");
+    });
+
+    // 트리뷰 접기
+    $(".btn_fold").click(function () {
+        $(this).addClass("on");
+        $(".btn_fold_list").removeClass("on");
+    });
+
+    // 트리뷰 펼치기
+    $(".btn_fold_list").click(function () {
+        $(this).addClass("on");
+        $(".btn_fold").removeClass("on");
+    });
+
+    // USER NAME CLICK
+    $(".btn_mypage").click(function () {
+        $(".mypage .items").toggleClass("on");
+    });
+};
+
+/**
+ * @method
+ * @name settingBox_handlerEvent
+ * @description layout을 선택하는 창에서 이벤트를 제어한다.
+ * @param {string} e 이벤트 객체
+ * @hidden N
+ * @exception 
+ */
+scwin.settingBox_handlerEvent = function (e) {
+    if (e.keyCode == 27 || e.type == "click") {
+        $(".settingbox").removeClass("on");
+    }
+};
+
+/**
+ * @event
+ * @name btn_tab_allclose_onclick
+ * @description 탭뷰 사용 시 모두 닫기 버튼을 누른 경우
+ */
+scwin.btn_tab_allclose_onclick = async function () {
+    main.pushStateMain();
+    scwin.tabCount = tac_layout.getTabCount();
+     for (let i = scwin.tabCount; i > 0; i--) {
+        await tac_layout.deleteTab(i);    
+    }
+}
+
+
+/**
+ * @event
+ * @name tac_layout_onbeforetabclose
+ * @description 탭뷰 모드에서 탭이 닫히기 전 이벤트 정의
+ */
+scwin.tac_layout_onbeforetabclose = function (tabID, idx) {
+    const tabFrame = this.getFrame(idx);
+    return main.closeBeforePage(tabFrame);
+};
+
+/**
+ * @event
+ * @name wfm_side_onwframeload
+ * @description side.xml 화면이 로드된 직후 이벤트 정의
+ */
+scwin.wfm_side_onwframeload = function () {
+    main.initMainLoad();
+};
+]]></script>
+
+	</head>
+	<body ev:onpageload="scwin.onpageload" ev:onkeydown="scwin.settingBox_handlerEvent" ev:onclick="scwin.settingBox_handlerEvent" class="wrm">
+		<xf:group style="" id="grp_dimLayer" class="dim"></xf:group>
+		<xf:group class="wrap show_menu" id="grp_wrap" style="">
+			<w2:wframe style="" id="wfm_header" class="header" scope="true" src="../../cm/xml/header.xml"></w2:wframe>
+			<xf:group class="container" id="" style="">
+				<xf:group style="" id="" class="contents">
+					<w2:tabControl useTabKeyOnly="true" id="tac_layout" useMoveNextTabFocus="false" useConfirmMessage="false"
+						confirmTrueAction="exist" confirmFalseAction="new" alwaysDraw="false" style="" class="tbc_layout" hiddenTab="" tabPosition=""
+						closable="true" useAccessibilityMenu="false" tableRender="" tabScroll="true" focusOnStart=""
+						preventTabClickEvent="" selectedIndex="" spaAuto="" confirmMessage="" ev:onbeforetabclose="scwin.tac_layout_onbeforetabclose"
+						changeActiveTab="true">
+					</w2:tabControl>
+					<!--					23.03.02 모바일 시작시점 adaptiveThreshold 800->890-->
+					<w2:anchor outerDiv="false" style="" id="btn_tab_allclose" class="tbc_close" ev:onclick="scwin.btn_tab_allclose_onclick"
+						title="탭 전체 닫기">
+						<xf:label><![CDATA[탭전체닫기]]></xf:label>
+					</w2:anchor>
+					<xf:group id="grpMsg" style="position: absolute;bottom:40px;left:10px;min-width:calc( 98% - 20px );z-index: 9980;">
+						<xf:group style="display:none;" id="msg_success" class="msg_box success">
+							<w2:textbox tagname="" style="min-height:20px" id="txt_success" label="정상 처리 되었습니다." class="txt_msg"></w2:textbox>
+						</xf:group>
+						<xf:group style="display:none;" id="msg_info" class="msg_box info">
+							<w2:textbox tagname="" style="" id="txt_info" label="정상 처리 되었습니다." class="txt_msg"></w2:textbox>
+						</xf:group>
+						<xf:group style="display:none;" id="msg_warning" class="msg_box warning">
+							<xf:group style="" id="">
+								<w2:textbox tagname="" style="" id="txt_warning" label="처리 도중 오류가 발생하였습니다." class="txt_msg"></w2:textbox>
+								<xf:trigger ev:onclick="scwin.removeWarnMsg" disabled="" style="" id="btn_warnig" type="button"
+									class="btn_close">
+									<xf:label><![CDATA[테이블버튼]]></xf:label>
+								</xf:trigger>
+							</xf:group>
+							<xf:textarea style="min-height: 100px;" id="textarea_warning" placeholder=""></xf:textarea>
+						</xf:group>
+						<xf:group style="display:none;" id="msg_error" class="msg_box error">
+							<xf:group style="" id="">
+								<w2:textbox tagname="" style="" id="txt_error" label="처리 도중 오류가 발생하였습니다." class="txt_msg"></w2:textbox>
+								<xf:trigger ev:onclick="scwin.removeErrorMsg" disabled="" style="" id="btn_error" type="button"
+									class="btn_close">
+									<xf:label><![CDATA[테이블버튼]]></xf:label>
+								</xf:trigger>
+							</xf:group>
+							<xf:textarea style="min-height: 100px;" id="textarea_error" placeholder=""></xf:textarea>
+						</xf:group>
+					</xf:group>
+				</xf:group>
+				<w2:wframe style="" id="wfm_wtalk" class="" src="/cm/xml/wtalk.xml"></w2:wframe>
+			</xf:group>
+			<w2:wframe style="" id="wfm_side" class="side" scope="true" src="../../cm/xml/side.xml" ev:onwframeload="scwin.wfm_side_onwframeload"></w2:wframe>
+			<w2:wframe style="" id="wfm_footer" scope="true" src="../../cm/xml/footer.xml"></w2:wframe>
+			<xf:group style="" id="" class="dim"></xf:group>
+		</xf:group>
+	</body>
+</html>

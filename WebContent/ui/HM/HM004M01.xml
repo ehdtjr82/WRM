@@ -1,0 +1,204 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">   
+    <head meta_screenId="HM004M01" meta_screenName="일정 조회" meta_author="Inswave Systems" meta_date="2024.06.19" meta_screenDesc="달력에서 일정을 조회하는 화면">       	
+        <w2:type>COMPONENT</w2:type>   	
+        <w2:buildDate/>    	
+        <w2:MSA/>   	
+        <xf:model>
+        	<w2:dataCollection baseNode="map">
+        		<w2:dataList baseNode="list" repeatNode="map" id="dlt_schedule" saveRemovedData="true">
+        			<w2:columnInfo>
+        				<w2:column id="SCHE_ID" name="식별자" dataType="text"></w2:column>
+        				<w2:column id="SCHE_START" name="시작일자" dataType="text"></w2:column>
+        				<w2:column id="SCHE_END" name="마감일자" dataType="text"></w2:column>
+        				<w2:column id="MEMO" name="일정내용" dataType="text"></w2:column>
+        				<w2:column id="SCHE_THEME" name="색상" dataType="text"></w2:column>
+        				<w2:column id="SCHE_TITLE" name="일정명" dataType="text"></w2:column>
+        				<w2:column id="SCHE_CODE" name="일정구분" dataType="text"></w2:column>
+        				<w2:column id="SCHE_STIME" name="시작시간" dataType="text"></w2:column>
+        				<w2:column id="SCHE_FTIME" name="마감시간" dataType="text"></w2:column>
+        			</w2:columnInfo>
+        		</w2:dataList>
+        		<w2:dataMap baseNode="map" id="dma_select">
+        			<w2:keyInfo>
+        				<w2:key id="SCHE_ID" name="식별자" dataType="text"></w2:key>
+        				<w2:key id="SCHE_START" name="시작일자" dataType="text"></w2:key>
+        				<w2:key id="SCHE_END" name="마감일자" dataType="text"></w2:key>
+        				<w2:key id="MEMO" name="일정내용" dataType="text"></w2:key>
+        				<w2:key id="SCHE_THEME" name="색상" dataType="text"></w2:key>
+        				<w2:key id="SCHE_TITLE" name="일정명" dataType="text"></w2:key>
+        				<w2:key id="SCHE_CODE" name="일정구분" dataType="text"></w2:key>
+        				<w2:key id="SCHE_STIME" name="시작시간" dataType="text"></w2:key>
+        				<w2:key id="SCHE_FTIME" name="마감시간" dataType="text"></w2:key>
+        			</w2:keyInfo>
+        		</w2:dataMap>
+        	</w2:dataCollection>
+        	<w2:workflowCollection />
+        	<xf:submission id="sbm_schedule" ref="data:json,dma_select" target="data:json,dlt_schedule" action="/schedule" method="post"
+        		mediatype="application/json" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous"
+        		processMsg="" ev:submit="" ev:submitdone="scwin.sbm_schedule_submitdone" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        	<xf:submission id="sbm_save" ref="data:json,dlt_schedule" target="" action="/schedule/insert" method="post"
+        		mediatype="application/json" encoding="UTF-8" instance="" replace="" errorHandler="" customHandler="" mode="asynchronous"
+        		processMsg="" ev:submit="" ev:submitdone="" ev:submiterror="" abortTrigger="">
+        	</xf:submission>
+        </xf:model>
+
+        <w2:layoutInfo/>
+            	
+        <w2:publicInfo method="scwin.popUp,scwin.readSchedule"/>
+            	
+        <script lazy="false" type="text/javascript"><![CDATA[/**
+ * @method
+ * @name onpageload
+ * @description 일정 관리 기능 창이 로드된 후의 동작 설정
+ * @hidden N
+ * @exception 
+ */ 
+scwin.onpageload = function() {
+	// 모든 일정 조회
+	$c.sbm.execute(sbm_schedule);
+};
+
+/**
+ * @event
+ * @name cal_onclick
+ * @description ScheduleCalendar를 클릭하면 동작하는 이벤트
+ * @param {Object} retObj 클릭한 일정의 정보
+ * @hidden N
+ * @exception 
+ */ 
+scwin.cal_onclick = function (retObj) {
+	//초기화
+	dma_select.initRowStatus();
+
+	// 팝업 실행
+	scwin.popUp(retObj);
+};
+
+
+/**
+ * @event
+ * @name cal_onbeforeaddschedule
+ * @description 사용자 정의 팝업창을 위해 prompt를 억제하는 이벤트
+ * @param {Object} retObj 클릭한 일정의 정보
+ * @hidden N
+ * @exception 
+ */ 
+scwin.cal_onbeforeaddschedule = function(retObj) {
+	return false;
+}
+
+/**
+ * @method
+ * @name popUp
+ * @description 일정과 관련된 팝업창을 불러온다. id값의 유무를 통해 기존 스케쥴 여부를 확인해 일정 추가, 기존 일정 수정창을 팝업으로 부른다.
+ * @param {Object} retObj 클릭한 일정의 정보
+ * @hidden N
+ * @exception 
+ */ 
+scwin.popUp = async function(retObj) {
+	// 기존 일정이 있을 경우 상세 조회 페이지로 이동
+	if(retObj.id != null || retObj.title != null) {
+
+		// 클릭된 정보를 검색해 행 데이터 모두를 가져온다
+	    const selEvent = dlt_schedule.getMatchedJSON("SCHE_ID", retObj.id);	
+
+		const sel = {
+			"SCHE_ID" : selEvent[0].SCHE_ID,
+			"SCHE_TITLE" : selEvent[0].SCHE_TITLE,
+			"SCHE_START" : selEvent[0].SCHE_START,
+			"SCHE_END" : selEvent[0].SCHE_END,
+			"SCHE_THEME" : selEvent[0].SCHE_THEME,
+			"SCHE_STIME" : selEvent[0].SCHE_STIME,
+			"SCHE_FTIME" : selEvent[0].SCHE_FTIME,
+			"SCHE_CODE" : selEvent[0].SCHE_CODE,
+			"MEMO" : selEvent[0].MEMO
+		}
+
+		// 검색된 데이터를 DataMap에 바인딩
+		dma_select.setJSON(sel);
+
+		const row = dma_select.getJSON();
+		const data = { 
+			data : row,
+			callbackFn : "scwin.readSchedule"
+		 };
+
+		const url = "/ui/HM/HM004P02.xml";
+		const opt = {
+			id : "select",
+			popupName : "상세 일정 조회",
+			width: 450,
+			height: 480,
+			modal: true,
+			type : "wframePopup",
+		}
+
+		await $c.win.openPopup(url, opt, data);
+
+	// 등록된 일정이 아닐 경우 일정 등록 페이지 팝업
+	} else {
+		
+		// 클릭으로 선택된 정보들을 DataMap에 담는다.
+		const start = $c.date.formatDateTime(retObj.start);
+		const end = $c.date.formatDateTime(retObj.end);
+		
+		const selInfo = {
+		"SCHE_START" : start,
+		"SCHE_END" : end
+		}
+
+		dma_select.setJSON(selInfo);
+		
+		const data = {
+			data : dma_select.getJSON(),
+			callbackFn : "scwin.readSchedule"
+		};
+
+		const url = "/ui/HM/HM004P01.xml";
+		const opt = {
+			id : "insert",
+			popupName : "일정 등록",
+			width: 450,
+			height: 480,
+			modal : true,
+			type : "wframePopup"
+		};
+		
+		await $c.win.openPopup(url, opt, data);
+	}
+};
+
+// 일정 조회 함수
+/**
+ * @method
+ * @name readSchedule
+ * @description 일정을 조회를 한다.
+ * @param
+ * @hidden N
+ * @exception 
+ */ 
+scwin.readSchedule = function() {
+	$c.sbm.execute(sbm_schedule);
+};
+]]></script>
+            
+    </head>
+        
+    <body ev:onpageload="scwin.onpageload">
+    	<xf:group id="" style="" class="sub_contents flex_cont">
+    		<w2:wframe id="wfm_header" src="../../cm/xml/contentHeader.xml" style=""></w2:wframe>
+    		<xf:group id="" style="" class="titbox">
+    			<w2:textbox id="" label="일정 내역" style="" tagname="h3"></w2:textbox>
+    			<xf:group id="" style="" class="rt">
+    			</xf:group>
+    		</xf:group>
+    		<xf:group id="" style="" class="calendarbox">
+    			<w2:scheduleCalendar selectable="true" ioFormat="yyyyMMdd" id="cal" lang="" defaultDate="" editable="true" headerRightBtn="true" scheduleClickPopup = "false" weekends="true"
+    				titleColumn="SCHE_TITLE" startColumn="SCHE_START" dataList="data:dlt_schedule" style="width: 100%;height: 550px;" headerLeftBtn="true" idColumn="SCHE_ID" headerTitle="" version="6.1.11" endColumn="SCHE_END" themeColumn="SCHE_THEME" eventOrderColumn="SCHE_STIME" ev:onclick="scwin.cal_onclick" ev:onbeforeaddschedule="scwin.cal_onbeforeaddschedule" includeScheduleEnd="true" weekStartsOn="1" timeZone="Asia/Seoul" timeFormat="hh:mm">
+    			</w2:scheduleCalendar>
+    		</xf:group>
+    	</xf:group>
+    </body>
+
+</html>
